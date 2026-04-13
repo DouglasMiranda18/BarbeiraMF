@@ -91,10 +91,10 @@
       width: 52px;
       height: 52px;
       border-radius: 14px;
-      background: #fff;
       object-fit: cover;
-      padding: 4px;
-      border: 1px solid rgba(255,255,255,.08);
+      background: transparent;
+      padding: 0;
+      border: none;
     }
     .brand-copy strong,
     h1, h2, h3,
@@ -299,8 +299,8 @@
       width: min(66%, 310px);
       aspect-ratio: 1;
       object-fit: contain;
-      background: #fff;
-      padding: 24px;
+      background: transparent;
+      padding: 0;
       border-radius: 24px;
       box-shadow: 0 24px 60px rgba(0,0,0,.36);
       position: relative;
@@ -538,11 +538,15 @@
       width: 100%;
       border-radius: 16px;
       border: 1px solid rgba(255,255,255,.08);
-      background: rgba(255,255,255,.045);
+      background: rgba(255,255,255,.08);
       color: var(--text);
       padding: 15px 16px;
       outline: none;
       transition: .2s ease;
+    }
+    select option {
+      background: #111;
+      color: #f5f5f5;
     }
     input:focus,
     select:focus,
@@ -1013,7 +1017,7 @@
     <header class="topbar">
       <div class="container topbar-inner">
         <a href="#inicio" class="brand">
-          <img class="brand-logo" id="brandLogo" alt="Logo Barbearia MF" src="./assets/logo-mf.png" />
+          <img class="brand-logo" id="brandLogo" alt="Logo Barbearia MF" src="Logo.png" />
           <div class="brand-copy">
             <strong>Barbearia MF</strong>
             <span>Agende seu horário com praticidade e chegue sem espera</span>
@@ -1070,7 +1074,7 @@
 
             <div class="hero-side">
               <div class="shell-card logo-stage reveal">
-                <img id="heroLogo" class="hero-logo" alt="Logo Barbearia MF" src="./assets/logo-mf.png" />
+                <img id="heroLogo" class="hero-logo" alt="Logo Barbearia MF" src="Logo.png" />
               </div>
               <div class="shell-card side-copy reveal">
                 <h3>Atendimento no seu tempo</h3>
@@ -1229,7 +1233,7 @@
       <div class="admin-layout">
         <aside class="admin-sidebar">
           <div class="admin-brand">
-            <img id="adminBrandLogo" src="./assets/logo-mf.png" alt="Logo Barbearia MF" />
+            <img id="adminBrandLogo" src="Logo.png" alt="Logo Barbearia MF" />
             <div>
               <strong>Barbearia MF</strong>
               <span>Painel administrativo</span>
@@ -1442,7 +1446,7 @@
                   </div>
                   <div class="field-full">
                     <label for="barberPhotoUrl">Foto (URL)</label>
-                    <input id="barberPhotoUrl" placeholder="./assets/barbeiros/barbeiro-1.jpg" />
+                    <input id="barberPhotoUrl" placeholder="Logo.png ou URL de imagem" />
                   </div>
                   <div class="field">
                     <label for="barberStart">Início do expediente</label>
@@ -1513,7 +1517,7 @@
                 <form id="settingsForm" class="form-grid" style="margin-top:14px;">
                   <div class="field-full">
                     <label for="settingsLogo">Logo (URL)</label>
-                    <input id="settingsLogo" placeholder="./assets/logo-mf.png" />
+                    <input id="settingsLogo" placeholder="Logo.png ou URL de imagem" />
                   </div>
                   <div class="field">
                     <label for="settingsWhatsapp">WhatsApp</label>
@@ -1609,10 +1613,10 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const DEFAULT_LOGO = './assets/logo-mf.png';
+    const DEFAULT_LOGO = 'Logo.png';
     const DEFAULT_BARBERS = [
-      { nome: 'MF', especialidade: 'Corte social, degradê e acabamento', fotoUrl: './assets/barbeiros/barbeiro-1.jpg', horaInicio: '09:00', horaFim: '19:00', ativo: true },
-      { nome: 'Barbeiro 2', especialidade: 'Barba, acabamento e corte premium', fotoUrl: './assets/barbeiros/barbeiro-2.jpg', horaInicio: '09:00', horaFim: '19:00', ativo: true }
+      { nome: 'MF', especialidade: 'Corte social, degradê e acabamento', fotoUrl: 'Logo.png', horaInicio: '09:00', horaFim: '19:00', ativo: true },
+      { nome: 'Barbeiro 2', especialidade: 'Barba, acabamento e corte premium', fotoUrl: 'Logo.png', horaInicio: '09:00', horaFim: '19:00', ativo: true }
     ];
     const DEFAULT_SERVICES = [
       { nome: 'Corte masculino', preco: 35, duracaoMinutos: 40, descricao: 'Corte alinhado com acabamento profissional.', ativo: true },
@@ -1620,9 +1624,9 @@
       { nome: 'Corte + Barba', preco: 50, duracaoMinutos: 60, descricao: 'Pacote completo para renovar o visual.', ativo: true }
     ];
     const DEFAULT_GALLERY = [
-      { title: 'Corte premium em destaque', image: './assets/galeria/galeria-01.jpg' },
-      { title: 'Barba e acabamento preciso', image: './assets/galeria/galeria-02.jpg' },
-      { title: 'Ambiente e experiência MF', image: './assets/galeria/galeria-03.jpg' }
+      { title: 'Corte premium em destaque', image: 'Logo.png' },
+      { title: 'Barba e acabamento preciso', image: 'Logo.png' },
+      { title: 'Ambiente e experiência MF', image: 'Logo.png' }
     ];
 
     const now = new Date();
