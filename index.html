@@ -337,8 +337,9 @@
 
     /* ─── SERVICE CARDS ─── */
     .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    .service-card { padding: 24px; transition: .25s ease; cursor: pointer; }
-    .service-card:hover { border-color: rgba(212,168,67,.30); transform: translateY(-3px); }
+    .service-card { padding: 24px; transition: .25s ease; cursor: pointer; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel-soft); display: block; width: 100%; text-align: left; font-family: inherit; }
+    .service-card:hover { border-color: rgba(212,168,67,.30); transform: translateY(-3px); background: rgba(212,168,67,.10); }
+    .service-card:active { transform: translateY(-1px); }
     .service-card h3 { color: var(--text-strong); margin-bottom: 10px; }
     .service-card p { color: var(--muted); font-size: .9rem; line-height: 1.65; }
 
@@ -1463,9 +1464,9 @@
       { nome: 'Corte + Barba', preco: 50, duracaoMinutos: 60, descricao: 'Pacote completo para renovar o visual.', ativo: true }
     ];
     const DEFAULT_GALLERY = [
-      { title: 'Corte premium em destaque', image: 'img/galeria-corte.jpg' },
-      { title: 'Barba e acabamento preciso', image: 'img/galeria-barba.jpg' },
-      { title: 'Ambiente e experiência MF', image: 'img/galeria-ambiente.jpg' }
+      { title: 'Corte premium em destaque', image: 'Corte 1.png' },
+      { title: 'acabamento preciso', image: 'Corte 2.png' },
+      { title: 'Ambiente e experiência MF', image: 'Corte 3.png' }
     ];
 
     const now = new Date();
@@ -1603,7 +1604,7 @@
     function renderPublicServices() {
       const active = state.services.filter(s=>s.ativo);
       el.servicesGrid.innerHTML = active.length ? active.map((s,i)=>`
-        <button class="service-card reveal" style="transition-delay:${i*60}ms;border:none;background:none;cursor:pointer;text-align:left;padding:0;" onclick="el.serviceSelect.value='${s.id}';document.getElementById('agendamento').scrollIntoView({behavior:'smooth'});">
+        <button class="service-card reveal" data-service-id="${s.id}" style="transition-delay:${i*60}ms">
           <div class="section-tag" style="margin-bottom:12px;">Serviço ${String(i+1).padStart(2,'0')}</div>
           <h3>${s.nome}</h3>
           <p>${s.descricao||'Serviço profissional realizado com atenção aos detalhes.'}</p>
@@ -2004,6 +2005,15 @@
     el.clearAgendaFiltersBtn.addEventListener('click', ()=>{ state.agendaDate=todayISO; state.agendaBarber=''; state.agendaStatus=''; el.agendaFilterDate.value=todayISO; el.agendaFilterBarber.value=''; el.agendaFilterStatus.value=''; renderAgenda(); });
     el.clientSearchInput.addEventListener('input', e=>{ state.clientSearch=e.target.value; renderClients(); });
     el.financeMonthFilter.addEventListener('change', () => renderFinance(el.financeMonthFilter.value));
+
+    // Botões de serviço - Rolar para agendamento com serviço selecionado
+    document.addEventListener('click', e=>{
+      if(e.target.closest('[data-service-id]')){
+        const serviceId = e.target.closest('[data-service-id]').getAttribute('data-service-id');
+        el.serviceSelect.value = serviceId;
+        document.getElementById('agendamento').scrollIntoView({behavior:'smooth'});
+      }
+    });
 
     /* ── FORMS ── */
     el.loginForm.addEventListener('submit', async e=>{
