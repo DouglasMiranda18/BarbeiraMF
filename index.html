@@ -514,6 +514,39 @@
       font-weight: 700;
     }
     .contact-item > div { color: var(--text); font-size: .92rem; line-height: 1.55; }
+    .contact-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: fit-content;
+      max-width: 100%;
+      min-height: 40px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(212,168,67,.28);
+      background: rgba(212,168,67,.10);
+      color: var(--accent);
+      font-weight: 800;
+      font-size: .88rem;
+      overflow-wrap: anywhere;
+      transition: .18s ease;
+    }
+    .contact-link:hover {
+      background: var(--accent);
+      color: #0a0a0a;
+      transform: translateY(-1px);
+    }
+    .contact-link.whatsapp {
+      background: rgba(45,196,122,.14);
+      border-color: rgba(45,196,122,.25);
+      color: #b6ffd9;
+    }
+    .contact-link.whatsapp:hover {
+      background: var(--success);
+      border-color: var(--success);
+      color: #06150d;
+    }
 
     /* ─── FOOTER ─── */
     .footer { padding: 32px 0 48px; }
@@ -1468,6 +1501,9 @@
       { title: 'acabamento preciso', image: 'Corte 2.png' },
       { title: 'Ambiente e experiência MF', image: 'Corte 3.png' }
     ];
+    const DEFAULT_ADDRESS = 'Av. Nossa Sra. do Loreto, 1140 - Piedade, Jaboatão dos Guararapes - PE, 54420-200';
+    const DEFAULT_MAPS_LINK = 'https://maps.app.goo.gl/Y2sn3ZBnoWoSUSbD7';
+    const WHATSAPP_MESSAGE = 'Vim pelo site e quero agendar um horário.';
 
     const now = new Date();
     const todayISO = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
@@ -1569,6 +1605,36 @@
     function money(v=0) { return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
     function sanitizePhone(p='') { return p.replace(/\D/g,''); }
     function initials(n='') { return n.split(' ').filter(Boolean).slice(0,2).map(v=>v[0]?.toUpperCase()).join('')||'MF'; }
+    function whatsappLink(phone='') {
+      const digits = sanitizePhone(phone);
+      if(!digits) return '';
+      const normalized = digits.startsWith('55') ? digits : `55${digits}`;
+      return `https://wa.me/${normalized}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
+    }
+    function mapsLink(address='') {
+      const clean = address.trim();
+      return clean ? DEFAULT_MAPS_LINK : '';
+    }
+    function instagramLink(instagram='') {
+      const clean = instagram.trim();
+      if(!clean) return '';
+      if(/^https?:\/\//i.test(clean)) return clean;
+      return `https://www.instagram.com/${clean.replace(/^@/,'')}`;
+    }
+    function renderContactLink(target, text, href, fallback, className='') {
+      target.textContent = '';
+      if(!text || !href) {
+        target.textContent = fallback;
+        return;
+      }
+      const link = document.createElement('a');
+      link.href = href;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.className = `contact-link ${className}`.trim();
+      link.textContent = text;
+      target.appendChild(link);
+    }
 
     function buildTimeSlots(start='09:00', end='19:00', interval=30) {
       const slots=[];
@@ -1858,13 +1924,14 @@
     function applySettings() {
       const s = state.settings||{};
       const logo = s.logoUrl||DEFAULT_LOGO;
+      const address = s.endereco || DEFAULT_ADDRESS;
       el.brandLogo.src = logo; el.heroLogo.src = logo; el.adminBrandLogo.src = logo;
-      el.publicWhatsapp.textContent  = s.whatsapp||'Preencha no painel administrativo.';
-      el.publicAddress.textContent   = s.endereco||'Preencha no painel administrativo.';
-      el.publicInstagram.textContent = s.instagram||'Preencha no painel administrativo.';
+      renderContactLink(el.publicWhatsapp, s.whatsapp ? `Chamar no WhatsApp: ${s.whatsapp}` : '', whatsappLink(s.whatsapp), 'Preencha no painel administrativo.', 'whatsapp');
+      renderContactLink(el.publicAddress, address, mapsLink(address), 'Preencha no painel administrativo.');
+      renderContactLink(el.publicInstagram, s.instagram || '', instagramLink(s.instagram || ''), 'Preencha no painel administrativo.');
       el.previewWhatsapp.textContent  = s.whatsapp||'—';
       el.previewInstagram.textContent = s.instagram||'—';
-      el.previewAddress.textContent   = s.endereco||'—';
+      el.previewAddress.textContent   = address;
       document.getElementById('settingsLogo').value      = s.logoUrl||'';
       document.getElementById('settingsWhatsapp').value  = s.whatsapp||'';
       document.getElementById('settingsInstagram').value = s.instagram||'';
