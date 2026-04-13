@@ -147,6 +147,23 @@
       text-align: center;
     }
     .btn:hover { transform: translateY(-2px); }
+    .menu-toggle {
+      display: none;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 1.55rem;
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 12px;
+      transition: background .2s ease;
+    }
+    .menu-toggle:hover {
+      background: rgba(255,255,255,.08);
+    }
+    nav.open {
+      display: flex;
+    }
     .btn-primary { background: #fff; color: #090909; }
     .btn-secondary {
       background: rgba(255,255,255,.04);
@@ -837,13 +854,19 @@
       .topbar-inner {
         align-items: flex-start;
       }
+      .menu-toggle {
+        display: inline-flex;
+      }
       nav {
         order: 3;
+        display: none;
         width: 100%;
-        overflow-x: auto;
-        white-space: nowrap;
-        padding-bottom: 4px;
-        gap: 18px;
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px 0 0;
+      }
+      nav.open {
+        display: flex;
       }
       .hero-grid,
       .booking-grid,
@@ -1023,6 +1046,8 @@
             <span>Agende seu horário com praticidade e chegue sem espera</span>
           </div>
         </a>
+
+        <button id="menuToggle" class="menu-toggle" aria-label="Abrir menu">⋮</button>
 
         <nav>
           <a href="#servicos">Serviços</a>
@@ -1654,6 +1679,7 @@
       brandLogo: document.getElementById('brandLogo'),
       heroLogo: document.getElementById('heroLogo'),
       adminBrandLogo: document.getElementById('adminBrandLogo'),
+      menuToggle: document.getElementById('menuToggle'),
       publicWhatsapp: document.getElementById('publicWhatsapp'),
       publicAddress: document.getElementById('publicAddress'),
       publicInstagram: document.getElementById('publicInstagram'),
@@ -1726,6 +1752,10 @@
 
     function isOfflineError(err) {
       return err?.code === 'unavailable' || err?.message?.toLowerCase().includes('offline');
+    }
+
+    function isPermissionDeniedError(err) {
+      return err?.code === 'permission-denied' || err?.message?.toLowerCase().includes('permission-denied');
     }
 
     function money(value = 0) {
@@ -2149,6 +2179,10 @@
           await setDoc(ref, { nomeBarbearia: 'Barbearia MF', logoUrl: '', whatsapp: '', instagram: '', endereco: '' });
         }
       } catch (error) {
+        if (isPermissionDeniedError(error)) {
+          setStatus('Sem permissão para acessar o Firebase. Verifique as regras do Firestore.', 'error');
+          return;
+        }
         if (!isOfflineError(error)) throw error;
       }
     }
@@ -2168,45 +2202,59 @@
           }
         }
       } catch (error) {
+        if (isPermissionDeniedError(error)) {
+          setStatus('Sem permissão para acessar o Firebase. Verifique as regras do Firestore.', 'error');
+          return;
+        }
         if (!isOfflineError(error)) throw error;
       }
     }
 
     function startListeners() {
+      function handleFirestoreError(error, offlineMessage) {
+        if (isOfflineError(error)) {
+          setStatus(offlineMessage, 'offline');
+        } else if (isPermissionDeniedError(error)) {
+          setStatus('Sem permissão para acessar o Firebase. Verifique as regras do Firestore.', 'error');
+        } else {
+          setStatus('Erro ao ler dados do Firebase. Verifique o console do navegador.', 'error');
+        }
+      }
+
       onSnapshot(query(collection(db, 'servicos'), orderBy('nome')), snapshot => {
         state.services = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         renderAll();
         setStatus('Conectado ao Firebase. Dados em tempo real ativos.', 'online', true);
       }, error => {
-        if (isOfflineError(error)) setStatus('Você está offline. Alguns dados podem estar desatualizados.', 'offline');
+        handleFirestoreError(error, 'Você está offline. Alguns dados podem estar desatualizados.');
       });
 
       onSnapshot(query(collection(db, 'barbeiros'), orderBy('nome')), snapshot => {
         state.barbers = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         renderAll();
       }, error => {
-        if (isOfflineError(error)) setStatus('Sem internet. Exibindo barbeiros salvos localmente, se houver.', 'offline');
+        handleFirestoreError(error, 'Sem internet. Exibindo barbeiros salvos localmente, se houver.');
       });
 
       onSnapshot(query(collection(db, 'agendamentos'), orderBy('data'), orderBy('hora')), snapshot => {
         state.appointments = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         renderAll();
       }, error => {
-        if (isOfflineError(error)) setStatus('Os agendamentos não puderam ser atualizados agora porque o cliente está offline.', 'offline');
+        handleFirestoreError(error, 'Os agendamentos não puderam ser atualizados agora porque o cliente está offline.');
       });
 
       onSnapshot(query(collection(db, 'financeiro'), orderBy('data', 'desc')), snapshot => {
         state.finance = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         renderAll();
       }, error => {
-        if (isOfflineError(error)) setStatus('O financeiro está temporariamente offline.', 'offline');
+        handleFirestoreError(error, 'O financeiro está temporariamente offline.');
       });
 
       onSnapshot(doc(db, 'configuracoes', 'principal'), snapshot => {
         state.settings = snapshot.exists() ? snapshot.data() : null;
         applySettings();
       }, error => {
-        if (isOfflineError(error)) setStatus('As configurações não foram atualizadas por falta de conexão.', 'offline');
+        handleFirestoreError(error, 'As configurações não foram atualizadas por falta de conexão.');
       });
     }
 
@@ -2222,6 +2270,16 @@
 
     el.openLoginBtn.addEventListener('click', () => el.loginModal.classList.add('open'));
     el.closeLoginBtn.addEventListener('click', () => el.loginModal.classList.remove('open'));
+    el.menuToggle.addEventListener('click', () => {
+      const nav = document.querySelector('.topbar nav');
+      nav.classList.toggle('open');
+    });
+    document.querySelectorAll('.topbar nav a').forEach(link => {
+      link.addEventListener('click', () => {
+        const nav = document.querySelector('.topbar nav');
+        nav.classList.remove('open');
+      });
+    });
     el.backSiteBtn.addEventListener('click', () => {
       el.publicShell.classList.remove('hidden');
       el.adminShell.classList.remove('active');
