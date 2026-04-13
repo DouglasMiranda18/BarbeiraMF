@@ -337,7 +337,7 @@
 
     /* ─── SERVICE CARDS ─── */
     .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    .service-card { padding: 24px; transition: .25s ease; cursor: default; }
+    .service-card { padding: 24px; transition: .25s ease; cursor: pointer; }
     .service-card:hover { border-color: rgba(212,168,67,.30); transform: translateY(-3px); }
     .service-card h3 { color: var(--text-strong); margin-bottom: 10px; }
     .service-card p { color: var(--muted); font-size: .9rem; line-height: 1.65; }
@@ -1136,9 +1136,10 @@
         <div>
           <strong>Barbearia MF</strong>
           <p>Estilo, cuidado e atendimento de qualidade em cada horário marcado.</p>
+          <p style="margin-top:12px;font-size:.85rem;">📍 Av. Recife, 123 — Centro<br>Horário: Seg-Sex 09:00-19:00 | Sábados até 18:00</p>
         </div>
         <div>
-          <p>Desenvolvido por <strong>Agência Elevare</strong></p>
+          <p>Desenvolvido por <a href="https://agenciaelevare.netlify.app/" target="_blank" style="color:var(--accent);text-decoration:underline;cursor:pointer;">🚀 Agência Elevare</a></p>
         </div>
       </div>
     </footer>
@@ -1462,9 +1463,9 @@
       { nome: 'Corte + Barba', preco: 50, duracaoMinutos: 60, descricao: 'Pacote completo para renovar o visual.', ativo: true }
     ];
     const DEFAULT_GALLERY = [
-      { title: 'Corte premium em destaque', image: 'Logo.png' },
-      { title: 'Barba e acabamento preciso', image: 'Logo.png' },
-      { title: 'Ambiente e experiência MF', image: 'Logo.png' }
+      { title: 'Corte premium em destaque', image: 'img/galeria-corte.jpg' },
+      { title: 'Barba e acabamento preciso', image: 'img/galeria-barba.jpg' },
+      { title: 'Ambiente e experiência MF', image: 'img/galeria-ambiente.jpg' }
     ];
 
     const now = new Date();
@@ -1602,12 +1603,12 @@
     function renderPublicServices() {
       const active = state.services.filter(s=>s.ativo);
       el.servicesGrid.innerHTML = active.length ? active.map((s,i)=>`
-        <div class="service-card reveal" style="transition-delay:${i*60}ms">
+        <button class="service-card reveal" style="transition-delay:${i*60}ms;border:none;background:none;cursor:pointer;text-align:left;padding:0;" onclick="el.serviceSelect.value='${s.id}';document.getElementById('agendamento').scrollIntoView({behavior:'smooth'});">
           <div class="section-tag" style="margin-bottom:12px;">Serviço ${String(i+1).padStart(2,'0')}</div>
           <h3>${s.nome}</h3>
           <p>${s.descricao||'Serviço profissional realizado com atenção aos detalhes.'}</p>
           <div class="price-pill">${money(s.preco)} &nbsp;•&nbsp; ${s.duracaoMinutos} min</div>
-        </div>`).join('') : '<div class="empty-state">Nenhum serviço cadastrado ainda.</div>';
+        </button>`).join('') : '<div class="empty-state">Nenhum serviço cadastrado ainda.</div>';
       revealItems();
     }
 
