@@ -1,0 +1,2502 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Barbearia MF | Agendamento Online</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050505;
+      --bg-2: #0d0d0d;
+      --panel: rgba(18,18,18,.88);
+      --panel-soft: rgba(255,255,255,.04);
+      --line: rgba(255,255,255,.08);
+      --line-strong: rgba(255,255,255,.16);
+      --text: #f5f5f5;
+      --muted: #b7b7b7;
+      --soft: #7e7e7e;
+      --success: #23b16c;
+      --danger: #df5b5b;
+      --warning: #d3a64f;
+      --radius: 24px;
+      --radius-sm: 16px;
+      --shadow: 0 24px 70px rgba(0,0,0,.38);
+      --max: 1240px;
+      --hero-side: 340px;
+      --admin-side: 260px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255,255,255,.06), transparent 18%),
+        radial-gradient(circle at 90% 20%, rgba(255,255,255,.04), transparent 22%),
+        linear-gradient(180deg, #040404 0%, #0a0a0a 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font: inherit; }
+
+    .container {
+      width: min(calc(100% - 32px), var(--max));
+      margin: 0 auto;
+    }
+
+    .status-banner {
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      padding: 10px 0;
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      font-size: .92rem;
+    }
+    .status-banner.show { display: block; }
+    .status-banner.online { background: rgba(35,177,108,.14); color: #dcffed; }
+    .status-banner.offline { background: rgba(211,166,79,.14); color: #fff0d2; }
+    .status-banner.error { background: rgba(223,91,91,.14); color: #ffd9d9; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 120;
+      background: rgba(5,5,5,.78);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar-inner {
+      min-height: 82px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: #fff;
+      object-fit: cover;
+      padding: 4px;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .brand-copy strong,
+    h1, h2, h3,
+    .section-tag,
+    .metric-number,
+    .nav-title {
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: .06em;
+      font-weight: 400;
+    }
+    .brand-copy strong { display: block; font-size: 1.35rem; line-height: 1; }
+    .brand-copy span { color: var(--muted); font-size: .82rem; }
+
+    nav {
+      display: flex;
+      gap: 22px;
+      align-items: center;
+    }
+    nav a {
+      color: var(--muted);
+      font-size: .95rem;
+      transition: .2s ease;
+      position: relative;
+    }
+    nav a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -8px;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #fff, transparent);
+      transition: width .2s ease;
+    }
+    nav a:hover { color: #fff; }
+    nav a:hover::after { width: 100%; }
+
+    .btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn {
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 15px 22px;
+      cursor: pointer;
+      transition: .22s ease;
+      font-weight: 700;
+      min-height: 52px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary { background: #fff; color: #090909; }
+    .btn-secondary {
+      background: rgba(255,255,255,.04);
+      color: #fff;
+      border-color: var(--line);
+    }
+    .btn-danger {
+      background: rgba(223,91,91,.12);
+      color: #ffdada;
+      border-color: rgba(223,91,91,.2);
+    }
+
+    .shell-card,
+    .service-card,
+    .barber-card,
+    .gallery-card,
+    .booking-card,
+    .info-card,
+    .admin-sidebar,
+    .admin-main,
+    .admin-card,
+    .table-card,
+    .metric-card,
+    .action-card,
+    .modal-card {
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      backdrop-filter: blur(12px);
+    }
+
+    .section-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+      font-size: .82rem;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .hero {
+      min-height: calc(100vh - 82px);
+      display: flex;
+      align-items: center;
+      padding: 32px 0;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) var(--hero-side);
+      gap: 20px;
+      align-items: stretch;
+    }
+    .hero-main {
+      padding: 30px;
+      min-height: 620px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .hero-main::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.09), transparent 26%),
+        linear-gradient(180deg, transparent 58%, rgba(255,255,255,.02) 100%);
+      pointer-events: none;
+    }
+    .hero-main::after {
+      content: "✂";
+      position: absolute;
+      right: 18px;
+      top: 16px;
+      font-size: 4rem;
+      color: rgba(255,255,255,.05);
+      transform: rotate(14deg);
+      pointer-events: none;
+    }
+    .hero-main > * { position: relative; z-index: 1; }
+    h1 {
+      font-size: clamp(3rem, 7vw, 6.2rem);
+      line-height: .92;
+      max-width: 10ch;
+      margin-bottom: 18px;
+    }
+    .hero-text {
+      color: var(--muted);
+      font-size: 1.02rem;
+      line-height: 1.74;
+      max-width: 58ch;
+      margin-bottom: 24px;
+    }
+    .hero-bottom {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    .hero-stat {
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.07);
+      background: rgba(255,255,255,.03);
+    }
+    .hero-stat strong {
+      display: block;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.9rem;
+      letter-spacing: .06em;
+      margin-bottom: 6px;
+    }
+    .hero-stat span { color: var(--muted); line-height: 1.6; }
+
+    .hero-side {
+      display: grid;
+      gap: 18px;
+    }
+    .logo-stage {
+      padding: 24px;
+      min-height: 280px;
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .logo-stage::before,
+    .logo-stage::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    .logo-stage::before {
+      width: 280px;
+      height: 280px;
+      animation: pulse 7s linear infinite;
+    }
+    .logo-stage::after {
+      width: 390px;
+      height: 390px;
+      opacity: .35;
+      animation: pulse 10s linear infinite reverse;
+    }
+    .hero-logo {
+      width: min(66%, 310px);
+      aspect-ratio: 1;
+      object-fit: contain;
+      background: #fff;
+      padding: 24px;
+      border-radius: 24px;
+      box-shadow: 0 24px 60px rgba(0,0,0,.36);
+      position: relative;
+      z-index: 1;
+      animation: float 5.5s ease-in-out infinite;
+    }
+    .side-copy {
+      padding: 22px;
+    }
+    .side-copy h3,
+    .service-card h3,
+    .barber-card h3,
+    .booking-card h3,
+    .info-card h3,
+    .admin-card h3,
+    .table-card h3,
+    .metric-card h3 { font-size: 1.35rem; margin-bottom: 8px; }
+    .side-copy p,
+    .service-card p,
+    .barber-card p,
+    .booking-card p,
+    .info-card p,
+    .admin-card p,
+    .table-card p { color: var(--muted); line-height: 1.7; }
+
+    .ticker {
+      margin: 18px 0 0;
+      overflow: hidden;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      padding: 14px 0;
+    }
+    .ticker-track {
+      display: flex;
+      gap: 34px;
+      width: max-content;
+      padding-left: 24px;
+      animation: ticker 28s linear infinite;
+      color: #f0f0f0;
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: .84rem;
+      font-weight: 700;
+    }
+
+    section { padding: 34px 0; }
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+    .section-head p {
+      color: var(--muted);
+      max-width: 56ch;
+      line-height: 1.7;
+    }
+    h2 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: .95;
+    }
+
+    .services-grid,
+    .barbers-grid,
+    .gallery-grid,
+    .booking-grid,
+    .metrics-grid,
+    .actions-grid,
+    .admin-grid,
+    .summary-grid {
+      display: grid;
+      gap: 18px;
+    }
+    .services-grid { grid-template-columns: repeat(3, 1fr); }
+    .barbers-grid { grid-template-columns: repeat(2, 1fr); }
+    .gallery-grid { grid-template-columns: repeat(3, 1fr); }
+    .booking-grid { grid-template-columns: minmax(0, 1fr) .92fr; }
+
+    .service-card,
+    .barber-card,
+    .gallery-card,
+    .booking-card,
+    .info-card,
+    .metric-card,
+    .action-card,
+    .admin-card,
+    .table-card {
+      padding: 24px;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px) scale(.985);
+      transition: transform .7s cubic-bezier(.2,.8,.2,1), opacity .7s ease, border-color .3s ease;
+    }
+    .reveal.in-view {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .service-card,
+    .barber-card,
+    .gallery-card,
+    .metric-card,
+    .action-card { position: relative; overflow: hidden; }
+    .service-card:hover,
+    .barber-card:hover,
+    .gallery-card:hover,
+    .metric-card:hover,
+    .action-card:hover {
+      border-color: var(--line-strong);
+      transform: translateY(-4px);
+    }
+
+    .price-pill,
+    .mini-pill,
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 700;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      width: fit-content;
+    }
+    .price-pill { margin-top: 16px; }
+    .mini-pill { font-size: .8rem; }
+
+    .barber-card {
+      display: grid;
+      grid-template-columns: 94px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+    .avatar {
+      width: 94px;
+      height: 94px;
+      border-radius: 22px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.06);
+      overflow: hidden;
+      font-size: 1.55rem;
+      font-weight: 800;
+    }
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .gallery-card { padding: 0; min-height: 280px; overflow: hidden; }
+    .gallery-item {
+      min-height: 280px;
+      height: 100%;
+      display: flex;
+      align-items: end;
+      padding: 18px;
+      position: relative;
+      background-size: cover;
+      background-position: center;
+    }
+    .gallery-item::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,.12) 40%, rgba(0,0,0,.84) 100%);
+    }
+    .gallery-item span {
+      position: relative;
+      z-index: 1;
+      border-radius: 999px;
+      padding: 10px 14px;
+      background: rgba(0,0,0,.45);
+      border: 1px solid rgba(255,255,255,.08);
+      font-weight: 700;
+    }
+
+    .steps {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .step {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: .84rem;
+    }
+    .step b {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      font-size: .78rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    .field,
+    .field-full {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .field-full { grid-column: 1 / -1; }
+    label {
+      color: var(--soft);
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-size: .78rem;
+      font-weight: 700;
+    }
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.045);
+      color: var(--text);
+      padding: 15px 16px;
+      outline: none;
+      transition: .2s ease;
+    }
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: rgba(255,255,255,.22);
+      background: rgba(255,255,255,.065);
+      transform: translateY(-1px);
+    }
+    textarea { min-height: 110px; resize: vertical; }
+
+    .contact-stack { display: grid; gap: 12px; }
+    .contact-item {
+      padding: 16px 18px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.06);
+    }
+    .contact-item small,
+    .table th {
+      display: block;
+      color: var(--soft);
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-size: .72rem;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .admin-shell {
+      display: none;
+      padding: 24px 0 56px;
+    }
+    .admin-shell.active { display: block; }
+    .public-shell.hidden { display: none; }
+
+    .admin-layout {
+      display: grid;
+      grid-template-columns: var(--admin-side) minmax(0, 1fr);
+      gap: 18px;
+    }
+    .admin-sidebar {
+      padding: 18px;
+      position: sticky;
+      top: 98px;
+      align-self: start;
+    }
+    .admin-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    .admin-brand img {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: #fff;
+      object-fit: cover;
+      padding: 4px;
+    }
+    .admin-brand strong {
+      display: block;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: .06em;
+    }
+    .admin-brand span { color: var(--muted); font-size: .82rem; }
+    .nav-title { font-size: 1.1rem; margin-bottom: 10px; }
+    .nav-list { display: grid; gap: 10px; margin-bottom: 18px; }
+    .nav-btn {
+      width: 100%;
+      text-align: left;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.06);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+      font-weight: 700;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+    .nav-btn:hover,
+    .nav-btn.active {
+      background: #fff;
+      color: #090909;
+      border-color: #fff;
+    }
+    .side-note {
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.06);
+      background: rgba(255,255,255,.03);
+      margin-bottom: 14px;
+    }
+    .side-note strong { display: block; margin-bottom: 6px; }
+    .side-actions { display: grid; gap: 10px; }
+
+    .admin-main { padding: 18px; min-height: 780px; }
+    .admin-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .admin-top p { color: var(--muted); margin-top: 6px; }
+
+    .metrics-grid { grid-template-columns: repeat(4, 1fr); margin-bottom: 18px; }
+    .metric-number {
+      font-size: 2.5rem;
+      line-height: 1;
+      margin: 6px 0 8px;
+    }
+
+    .actions-grid { grid-template-columns: repeat(4, 1fr); margin-bottom: 18px; }
+    .action-card {
+      padding: 18px;
+      cursor: pointer;
+      text-align: left;
+      transition: .2s ease;
+    }
+    .action-card strong { display: block; margin-bottom: 6px; }
+
+    .admin-section { display: none; }
+    .admin-section.active { display: block; }
+    .admin-section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .admin-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .admin-tools > * { flex: 1 1 170px; }
+    .summary-grid { grid-template-columns: 1.12fr .88fr; }
+
+    .table-wrap-scroll {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 16px;
+    }
+    .table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+      margin-top: 14px;
+    }
+    .table th,
+    .table td {
+      text-align: left;
+      padding: 14px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      font-size: .94rem;
+      vertical-align: middle;
+    }
+
+    .status-pill {
+      font-size: .78rem;
+      padding: 7px 12px;
+      font-weight: 700;
+    }
+    .status-pendente { color: #fff0d0; background: rgba(211,166,79,.14); border-color: rgba(211,166,79,.22); }
+    .status-concluido { color: #dcffed; background: rgba(35,177,108,.13); border-color: rgba(35,177,108,.18); }
+    .status-cancelado { color: #ffd9d9; background: rgba(223,91,91,.12); border-color: rgba(223,91,91,.18); }
+
+    .row-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .row-actions button {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .empty-state {
+      padding: 18px;
+      border-radius: 16px;
+      border: 1px dashed rgba(255,255,255,.12);
+      color: var(--muted);
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 220;
+      backdrop-filter: blur(10px);
+    }
+    .modal.open { display: flex; }
+    .modal-card {
+      width: min(100%, 470px);
+      padding: 24px;
+      animation: modalIn .35s ease;
+    }
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .close-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.04);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 230;
+      min-width: 260px;
+      max-width: 360px;
+      padding: 16px 18px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(10,10,10,.96);
+      box-shadow: var(--shadow);
+      display: none;
+    }
+    .toast.show { display: block; }
+
+    .footer {
+      padding: 32px 0 54px;
+      color: var(--muted);
+    }
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--line);
+      padding-top: 24px;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(.86); opacity: .35; }
+      50% { opacity: .12; }
+      100% { transform: scale(1.14); opacity: .35; }
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(16px) scale(.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @media (max-width: 1180px) {
+      .hero-grid,
+      .booking-grid,
+      .admin-layout,
+      .summary-grid,
+      .metrics-grid,
+      .actions-grid,
+      .services-grid,
+      .gallery-grid { grid-template-columns: 1fr; }
+      .barbers-grid { grid-template-columns: 1fr; }
+      .admin-sidebar { position: static; }
+      .hero-main { min-height: auto; }
+    }
+    @media (max-width: 980px) {
+      .topbar-inner {
+        align-items: flex-start;
+      }
+      nav {
+        order: 3;
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 4px;
+        gap: 18px;
+      }
+      .hero-grid,
+      .booking-grid,
+      .admin-layout,
+      .summary-grid,
+      .metrics-grid,
+      .actions-grid,
+      .services-grid,
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+      .barbers-grid {
+        grid-template-columns: 1fr;
+      }
+      .admin-sidebar {
+        position: static;
+        max-height: none;
+        overflow: visible;
+      }
+      .hero-main {
+        min-height: auto;
+      }
+      .actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 820px) {
+      nav { display: flex; }
+      .topbar-inner,
+      .section-head,
+      .footer-inner,
+      .admin-top,
+      .admin-section-head {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .form-grid { grid-template-columns: 1fr; }
+      .barber-card { grid-template-columns: 1fr; }
+      .hero-bottom { grid-template-columns: 1fr; }
+      .btn-row { width: 100%; }
+      .btn-row .btn { flex: 1; }
+      h1 { font-size: clamp(2.6rem, 14vw, 4.7rem); }
+      h2 { font-size: clamp(1.9rem, 12vw, 2.8rem); }
+      .hero-main,
+      .service-card,
+      .barber-card,
+      .booking-card,
+      .info-card,
+      .metric-card,
+      .action-card,
+      .admin-card,
+      .table-card,
+      .admin-main,
+      .admin-sidebar {
+        padding: 18px;
+      }
+      .brand {
+        width: 100%;
+      }
+      .brand-copy strong {
+        font-size: 1.2rem;
+      }
+      .section-tag {
+        font-size: .74rem;
+        padding: 9px 12px;
+      }
+      .hero-text,
+      .section-head p,
+      .side-copy p,
+      .booking-card p,
+      .info-card p,
+      .admin-top p,
+      .admin-card p,
+      .table-card p {
+        font-size: .95rem;
+        line-height: 1.62;
+      }
+      .hero-logo {
+        width: min(58%, 220px);
+        padding: 18px;
+      }
+      .logo-stage {
+        min-height: 220px;
+      }
+      .hero-stat strong {
+        font-size: 1.55rem;
+      }
+      .step {
+        width: calc(50% - 5px);
+        justify-content: center;
+      }
+      .admin-tools {
+        flex-direction: column;
+      }
+      .admin-tools > * {
+        width: 100%;
+      }
+      .table {
+        min-width: 640px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .container {
+        width: min(calc(100% - 20px), var(--max));
+      }
+      .topbar-inner {
+        min-height: auto;
+        padding: 12px 0;
+      }
+      h1 {
+        font-size: clamp(2.2rem, 12vw, 3.4rem);
+        max-width: 9ch;
+      }
+      h2 {
+        font-size: clamp(1.65rem, 10vw, 2.3rem);
+      }
+      .hero {
+        padding-top: 16px;
+      }
+      .hero-bottom,
+      .actions-grid,
+      .metrics-grid {
+        grid-template-columns: 1fr;
+      }
+      .step {
+        width: 100%;
+      }
+      .booking-card,
+      .info-card {
+        border-radius: 20px;
+      }
+      .field label,
+      .field-full label {
+        font-size: .72rem;
+      }
+      input,
+      select,
+      textarea {
+        padding: 14px 14px;
+        border-radius: 14px;
+        font-size: 16px;
+      }
+      .btn {
+        width: 100%;
+      }
+      .nav-list {
+        grid-template-columns: 1fr 1fr;
+      }
+      .nav-btn {
+        padding: 13px 14px;
+        font-size: .92rem;
+      }
+      .table {
+        min-width: 580px;
+      }
+    }
+    }
+  </style>
+</head>
+<body>
+  <div class="status-banner" id="statusBanner">
+    <div class="container" id="statusBannerText">Conectando ao sistema...</div>
+  </div>
+
+  <div class="public-shell" id="publicShell">
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <a href="#inicio" class="brand">
+          <img class="brand-logo" id="brandLogo" alt="Logo Barbearia MF" src="./assets/logo-mf.png" />
+          <div class="brand-copy">
+            <strong>Barbearia MF</strong>
+            <span>Agende seu horário com praticidade e chegue sem espera</span>
+          </div>
+        </a>
+
+        <nav>
+          <a href="#servicos">Serviços</a>
+          <a href="#barbeiros">Barbeiros</a>
+          <a href="#galeria">Galeria</a>
+          <a href="#agendamento">Agendar</a>
+          <a href="#contato">Contato</a>
+        </nav>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" id="openLoginBtn">Área admin</button>
+          <a class="btn btn-primary" href="#agendamento">Marcar horário</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" id="inicio">
+        <div class="container">
+          <div class="hero-grid">
+            <div class="shell-card hero-main">
+              <div>
+                <div class="section-tag">Barbearia moderna, atendimento organizado e experiência premium</div>
+                <h1>SEU HORÁRIO. SEU BARBEIRO. SEU ESTILO.</h1>
+                <p class="hero-text">
+                  Na Barbearia MF, você escolhe o serviço, seleciona o barbeiro e agenda o melhor horário de forma rápida e prática. Tudo pensado para oferecer mais conforto, organização e uma experiência à altura do seu estilo.
+                </p>
+                <div class="btn-row">
+                  <a class="btn btn-primary" href="#agendamento">Agendar agora</a>
+                  <a class="btn btn-secondary" href="#servicos">Ver serviços</a>
+                </div>
+              </div>
+
+              <div class="hero-bottom">
+                <div class="hero-stat reveal">
+                  <strong>02</strong>
+                  <span>Dois barbeiros à sua escolha para você encontrar o horário ideal.</span>
+                </div>
+                <div class="hero-stat reveal">
+                  <strong>SEM FILA</strong>
+                  <span>Com horário marcado, o atendimento fica mais confortável e mais organizado.</span>
+                </div>
+                <div class="hero-stat reveal">
+                  <strong>PREMIUM</strong>
+                  <span>Uma experiência mais profissional do agendamento até o atendimento.</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="hero-side">
+              <div class="shell-card logo-stage reveal">
+                <img id="heroLogo" class="hero-logo" alt="Logo Barbearia MF" src="./assets/logo-mf.png" />
+              </div>
+              <div class="shell-card side-copy reveal">
+                <h3>Atendimento no seu tempo</h3>
+                <p>Mais praticidade para agendar, mais conforto para chegar no horário certo e ser atendido com tranquilidade.</p>
+              </div>
+              <div class="shell-card side-copy reveal">
+                <h3>Prático do início ao fim</h3>
+                <p>Escolha o barbeiro, veja os horários disponíveis e confirme seu atendimento em poucos passos.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="ticker">
+            <div class="ticker-track">
+              <span>BARBEARIA MF</span><span>CORTE MASCULINO</span><span>BARBA NA NAVALHA</span><span>HORÁRIO MARCADO</span><span>ATENDIMENTO PREMIUM</span><span>ESTILO E PRECISÃO</span><span>BARBEARIA MF</span><span>CORTE MASCULINO</span><span>BARBA NA NAVALHA</span><span>HORÁRIO MARCADO</span><span>ATENDIMENTO PREMIUM</span><span>ESTILO E PRECISÃO</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="servicos">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <div class="section-tag">Serviços</div>
+              <h2>SERVIÇOS DA BARBEARIA</h2>
+            </div>
+            <p>Conheça os serviços da Barbearia MF e escolha a opção ideal para manter o visual sempre alinhado.</p>
+          </div>
+          <div class="services-grid" id="servicesGrid"></div>
+        </div>
+      </section>
+
+      <section id="barbeiros">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <div class="section-tag">Equipe</div>
+              <h2>ESCOLHA SEU BARBEIRO</h2>
+            </div>
+            <p>Conheça os profissionais da Barbearia MF e escolha com quem deseja agendar seu atendimento.</p>
+          </div>
+          <div class="barbers-grid" id="barbersGrid"></div>
+        </div>
+      </section>
+
+      <section id="galeria">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <div class="section-tag">Estilo</div>
+              <h2>RESULTADOS E AMBIENTE</h2>
+            </div>
+            <p>Veja um pouco do ambiente, dos resultados e do cuidado presente em cada atendimento da Barbearia MF.</p>
+          </div>
+          <div class="gallery-grid" id="galleryGrid"></div>
+        </div>
+      </section>
+
+      <section id="agendamento">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <div class="section-tag">Agendamento</div>
+              <h2>AGENDE EM POUCOS PASSOS</h2>
+            </div>
+            <p>Escolha o serviço, selecione o barbeiro, veja os horários disponíveis e confirme seu atendimento em poucos passos.</p>
+          </div>
+
+          <div class="booking-grid">
+            <div class="booking-card reveal">
+              <div class="steps">
+                <div class="step"><b>1</b> Serviço</div>
+                <div class="step"><b>2</b> Barbeiro</div>
+                <div class="step"><b>3</b> Data</div>
+                <div class="step"><b>4</b> Horário</div>
+              </div>
+
+              <form id="bookingForm" class="form-grid">
+                <div class="field">
+                  <label for="clientName">Seu nome</label>
+                  <input id="clientName" required placeholder="Digite seu nome" />
+                </div>
+                <div class="field">
+                  <label for="clientPhone">WhatsApp</label>
+                  <input id="clientPhone" required placeholder="(81) 99999-9999" />
+                </div>
+                <div class="field">
+                  <label for="serviceSelect">Serviço</label>
+                  <select id="serviceSelect" required></select>
+                </div>
+                <div class="field">
+                  <label for="barberSelect">Barbeiro</label>
+                  <select id="barberSelect" required></select>
+                </div>
+                <div class="field">
+                  <label for="dateInput">Data</label>
+                  <input id="dateInput" type="date" required />
+                </div>
+                <div class="field">
+                  <label for="timeSelect">Horário disponível</label>
+                  <select id="timeSelect" required></select>
+                </div>
+                <div class="field-full">
+                  <label for="clientNotes">Observação</label>
+                  <textarea id="clientNotes" placeholder="Ex.: acabamento, barba desenhada ou alguma observação importante."></textarea>
+                </div>
+                <div class="field-full">
+                  <button class="btn btn-primary" type="submit">Confirmar agendamento</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="info-card reveal" id="contato">
+              <h3>Informações da Barbearia MF</h3>
+              <p>Confira os principais contatos da barbearia e tenha tudo em mãos para agendar ou chegar com facilidade.</p>
+              <div class="contact-stack" style="margin-top:16px;">
+                <div class="contact-item">
+                  <small>Conceito</small>
+                  <div>Mais praticidade para agendar, mais conforto para o cliente e mais organização no atendimento.</div>
+                </div>
+                <div class="contact-item">
+                  <small>WhatsApp</small>
+                  <div id="publicWhatsapp">Preencha no painel administrativo.</div>
+                </div>
+                <div class="contact-item">
+                  <small>Endereço</small>
+                  <div id="publicAddress">Preencha no painel administrativo.</div>
+                </div>
+                <div class="contact-item">
+                  <small>Instagram</small>
+                  <div id="publicInstagram">Preencha no painel administrativo.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer-inner">
+        <div>
+          <strong>Barbearia MF</strong>
+          <p>Barbearia MF — estilo, cuidado e atendimento de qualidade em cada horário marcado.</p>
+        </div>
+        <div>
+          <p>Desenvolvido por <strong>Agência Elevare</strong></p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="admin-shell" id="adminShell">
+    <div class="container">
+      <div class="admin-layout">
+        <aside class="admin-sidebar">
+          <div class="admin-brand">
+            <img id="adminBrandLogo" src="./assets/logo-mf.png" alt="Logo Barbearia MF" />
+            <div>
+              <strong>Barbearia MF</strong>
+              <span>Painel administrativo</span>
+            </div>
+          </div>
+
+          <div class="nav-title">Navegação</div>
+          <div class="nav-list">
+            <button class="nav-btn active" data-target="dashboardSection">Dashboard</button>
+            <button class="nav-btn" data-target="agendaSection">Agenda</button>
+            <button class="nav-btn" data-target="clientesSection">Clientes</button>
+            <button class="nav-btn" data-target="financeiroSection">Financeiro</button>
+            <button class="nav-btn" data-target="barbeirosSection">Barbeiros</button>
+            <button class="nav-btn" data-target="servicosSection">Serviços</button>
+            <button class="nav-btn" data-target="configSection">Configurações</button>
+          </div>
+
+          <div class="side-note">
+            <strong>Resumo do sistema</strong>
+            <p>O agendamento só aparece quando o horário está realmente livre e só pode ser feito até 15 minutos antes.</p>
+          </div>
+
+          <div class="side-actions">
+            <button class="btn btn-secondary" id="backSiteBtn">Ver site</button>
+            <button class="btn btn-danger" id="logoutBtn">Sair</button>
+          </div>
+        </aside>
+
+        <div class="admin-main">
+          <div class="admin-top">
+            <div>
+              <div class="section-tag">Painel</div>
+              <h1 style="font-size: clamp(2rem, 4vw, 3.1rem); max-width:none; margin-bottom:0;">CONTROLE GERAL DA MF</h1>
+              <p>Agenda, clientes, serviços, financeiro e configurações em uma visão organizada.</p>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-secondary" id="todayFilterBtn">Hoje</button>
+              <button class="btn btn-primary" id="goAgendaBtn">Ir para agenda</button>
+            </div>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <h3>Agendamentos hoje</h3>
+              <div class="metric-number" id="todayAppointmentsCount">0</div>
+              <p>Atendimentos previstos para o dia.</p>
+            </div>
+            <div class="metric-card">
+              <h3>Pendentes</h3>
+              <div class="metric-number" id="pendingCount">0</div>
+              <p>Clientes aguardando atendimento.</p>
+            </div>
+            <div class="metric-card">
+              <h3>Entradas do dia</h3>
+              <div class="metric-number" id="todayRevenue">R$ 0,00</div>
+              <p>Valores confirmados do dia.</p>
+            </div>
+            <div class="metric-card">
+              <h3>Saídas do dia</h3>
+              <div class="metric-number" id="todayExpenses">R$ 0,00</div>
+              <p>Custos e movimentações do dia.</p>
+            </div>
+          </div>
+
+          <div class="actions-grid">
+            <button class="action-card" data-target="agendaSection"><strong>Ver agenda</strong><span>Horários e atendimentos do dia.</span></button>
+            <button class="action-card" data-target="financeiroSection"><strong>Lançar financeiro</strong><span>Entradas, saídas e histórico.</span></button>
+            <button class="action-card" data-target="barbeirosSection"><strong>Gerir barbeiros</strong><span>Equipe, fotos e expediente.</span></button>
+            <button class="action-card" data-target="configSection"><strong>Editar site</strong><span>Logo, contatos e presença online.</span></button>
+          </div>
+
+          <section class="admin-section active" id="dashboardSection">
+            <div class="summary-grid">
+              <div class="table-card">
+                <div class="admin-section-head">
+                  <div>
+                    <h3>Agenda do dia</h3>
+                    <p>Visualize rapidamente os horários do dia e execute ações rápidas.</p>
+                  </div>
+                </div>
+                <div id="todayAppointmentsTable"></div>
+              </div>
+              <div class="summary-grid" style="grid-template-columns:1fr;">
+                <div class="admin-card">
+                  <h3>Próximos clientes</h3>
+                  <div id="nextClientsBox" class="contact-stack" style="margin-top:14px;"></div>
+                </div>
+                <div class="admin-card">
+                  <h3>Regras do agendamento</h3>
+                  <div id="bookingRulesBox" class="contact-stack" style="margin-top:14px;"></div>
+                </div>
+                <div class="admin-card">
+                  <h3>Resumo financeiro</h3>
+                  <div id="financeSummaryBox" class="contact-stack" style="margin-top:14px;"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="admin-section" id="agendaSection">
+            <div class="admin-section-head">
+              <div>
+                <h3>Agenda e atendimentos</h3>
+                <p>Filtre por data, barbeiro e status para encontrar rapidamente qualquer horário.</p>
+              </div>
+            </div>
+            <div class="admin-tools">
+              <input type="date" id="agendaFilterDate" />
+              <select id="agendaFilterBarber"><option value="">Todos os barbeiros</option></select>
+              <select id="agendaFilterStatus">
+                <option value="">Todos os status</option>
+                <option value="pendente">Pendentes</option>
+                <option value="concluido">Concluídos</option>
+                <option value="cancelado">Cancelados</option>
+              </select>
+              <button class="btn btn-secondary" id="clearAgendaFiltersBtn">Limpar filtros</button>
+            </div>
+            <div class="summary-grid">
+              <div class="table-card">
+                <h3>Todos os agendamentos</h3>
+                <div id="allAppointmentsTable"></div>
+              </div>
+              <div class="summary-grid" style="grid-template-columns:1fr;">
+                <div class="admin-card">
+                  <h3>Status do dia</h3>
+                  <div id="agendaDaySummary" class="contact-stack" style="margin-top:14px;"></div>
+                </div>
+                <div class="admin-card">
+                  <h3>Clientes por barbeiro</h3>
+                  <div id="agendaBarberSummary" class="contact-stack" style="margin-top:14px;"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="admin-section" id="clientesSection">
+            <div class="admin-section-head">
+              <div>
+                <h3>Clientes</h3>
+                <p>Base simples gerada automaticamente a partir dos agendamentos.</p>
+              </div>
+            </div>
+            <div class="admin-tools">
+              <input type="text" id="clientSearchInput" placeholder="Buscar por nome ou telefone" />
+            </div>
+            <div class="table-card">
+              <h3>Base de clientes</h3>
+              <div id="clientsTable"></div>
+            </div>
+          </section>
+
+          <section class="admin-section" id="financeiroSection">
+            <div class="summary-grid">
+              <div class="admin-card">
+                <h3>Lançamento financeiro</h3>
+                <p>Registre entradas e saídas manuais da barbearia.</p>
+                <form id="financeForm" class="form-grid" style="margin-top:14px;">
+                  <div class="field">
+                    <label for="financeType">Tipo</label>
+                    <select id="financeType">
+                      <option value="entrada">Entrada</option>
+                      <option value="saida">Saída</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="financeValue">Valor</label>
+                    <input id="financeValue" type="number" step="0.01" required placeholder="50" />
+                  </div>
+                  <div class="field">
+                    <label for="financeCategory">Categoria</label>
+                    <input id="financeCategory" required placeholder="Ex.: Produto, manutenção" />
+                  </div>
+                  <div class="field">
+                    <label for="financeDate">Data</label>
+                    <input id="financeDate" type="date" required />
+                  </div>
+                  <div class="field-full">
+                    <label for="financeDescription">Descrição</label>
+                    <textarea id="financeDescription" placeholder="Descreva a movimentação."></textarea>
+                  </div>
+                  <div class="field-full">
+                    <button class="btn btn-primary" type="submit">Salvar lançamento</button>
+                  </div>
+                </form>
+              </div>
+              <div class="admin-card">
+                <h3>Resumo do caixa</h3>
+                <div id="financeSummaryDetailed" class="contact-stack" style="margin-top:14px;"></div>
+              </div>
+            </div>
+            <div class="table-card" style="margin-top:18px;">
+              <h3>Histórico financeiro</h3>
+              <div id="financeTable"></div>
+            </div>
+          </section>
+
+          <section class="admin-section" id="barbeirosSection">
+            <div class="summary-grid">
+              <div class="admin-card">
+                <h3>Cadastrar barbeiro</h3>
+                <p>Adicione o nome, especialidade, foto e horário de expediente.</p>
+                <form id="barberForm" class="form-grid" style="margin-top:14px;">
+                  <div class="field">
+                    <label for="barberName">Nome</label>
+                    <input id="barberName" required placeholder="Nome do barbeiro" />
+                  </div>
+                  <div class="field">
+                    <label for="barberSpecialty">Especialidade</label>
+                    <input id="barberSpecialty" required placeholder="Ex.: Degradê, barba, acabamento" />
+                  </div>
+                  <div class="field-full">
+                    <label for="barberPhotoUrl">Foto (URL)</label>
+                    <input id="barberPhotoUrl" placeholder="./assets/barbeiros/barbeiro-1.jpg" />
+                  </div>
+                  <div class="field">
+                    <label for="barberStart">Início do expediente</label>
+                    <input id="barberStart" type="time" value="09:00" required />
+                  </div>
+                  <div class="field">
+                    <label for="barberEnd">Fim do expediente</label>
+                    <input id="barberEnd" type="time" value="19:00" required />
+                  </div>
+                  <div class="field-full">
+                    <button class="btn btn-primary" type="submit">Salvar barbeiro</button>
+                  </div>
+                </form>
+              </div>
+              <div class="table-card">
+                <h3>Equipe cadastrada</h3>
+                <div id="barbersTable"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="admin-section" id="servicosSection">
+            <div class="summary-grid">
+              <div class="admin-card">
+                <h3>Cadastrar serviço</h3>
+                <p>Cadastre o serviço, valor, duração e descrição.</p>
+                <form id="serviceForm" class="form-grid" style="margin-top:14px;">
+                  <div class="field">
+                    <label for="serviceName">Nome do serviço</label>
+                    <input id="serviceName" required placeholder="Ex.: Corte masculino" />
+                  </div>
+                  <div class="field">
+                    <label for="servicePrice">Preço</label>
+                    <input id="servicePrice" type="number" step="0.01" required placeholder="35" />
+                  </div>
+                  <div class="field">
+                    <label for="serviceDuration">Duração (minutos)</label>
+                    <input id="serviceDuration" type="number" required placeholder="45" />
+                  </div>
+                  <div class="field">
+                    <label for="serviceActive">Status</label>
+                    <select id="serviceActive">
+                      <option value="true">Ativo</option>
+                      <option value="false">Inativo</option>
+                    </select>
+                  </div>
+                  <div class="field-full">
+                    <label for="serviceDescription">Descrição</label>
+                    <textarea id="serviceDescription" placeholder="Descreva o serviço."></textarea>
+                  </div>
+                  <div class="field-full">
+                    <button class="btn btn-primary" type="submit">Salvar serviço</button>
+                  </div>
+                </form>
+              </div>
+              <div class="table-card">
+                <h3>Catálogo atual</h3>
+                <div id="servicesTable"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="admin-section" id="configSection">
+            <div class="summary-grid">
+              <div class="admin-card">
+                <h3>Configurações do site</h3>
+                <p>Atualize logo, WhatsApp, Instagram e endereço exibidos na página.</p>
+                <form id="settingsForm" class="form-grid" style="margin-top:14px;">
+                  <div class="field-full">
+                    <label for="settingsLogo">Logo (URL)</label>
+                    <input id="settingsLogo" placeholder="./assets/logo-mf.png" />
+                  </div>
+                  <div class="field">
+                    <label for="settingsWhatsapp">WhatsApp</label>
+                    <input id="settingsWhatsapp" placeholder="(81) 99999-9999" />
+                  </div>
+                  <div class="field">
+                    <label for="settingsInstagram">Instagram</label>
+                    <input id="settingsInstagram" placeholder="@barbeariamf" />
+                  </div>
+                  <div class="field-full">
+                    <label for="settingsAddress">Endereço</label>
+                    <input id="settingsAddress" placeholder="Digite o endereço" />
+                  </div>
+                  <div class="field-full">
+                    <button class="btn btn-primary" type="submit">Salvar configurações</button>
+                  </div>
+                </form>
+              </div>
+              <div class="admin-card">
+                <h3>Preview do contato</h3>
+                <div class="contact-stack" style="margin-top:14px;">
+                  <div class="contact-item"><small>WhatsApp</small><div id="previewWhatsapp">-</div></div>
+                  <div class="contact-item"><small>Instagram</small><div id="previewInstagram">-</div></div>
+                  <div class="contact-item"><small>Endereço</small><div id="previewAddress">-</div></div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="loginModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <h3>Entrar no painel</h3>
+          <p style="color:var(--muted); margin-top:6px;">Faça login para acessar agenda, clientes, serviços e financeiro.</p>
+        </div>
+        <button class="close-btn" id="closeLoginBtn">✕</button>
+      </div>
+      <form id="loginForm" class="form-grid">
+        <div class="field-full">
+          <label for="loginEmail">E-mail</label>
+          <input id="loginEmail" type="email" required placeholder="admin@barbeariamf.com" />
+        </div>
+        <div class="field-full">
+          <label for="loginPassword">Senha</label>
+          <input id="loginPassword" type="password" required placeholder="••••••••" />
+        </div>
+        <div class="field-full">
+          <button class="btn btn-primary" type="submit">Entrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      doc,
+      setDoc,
+      updateDoc,
+      deleteDoc,
+      getDoc,
+      getDocs,
+      query,
+      orderBy,
+      onSnapshot,
+      serverTimestamp,
+      enableIndexedDbPersistence,
+      runTransaction
+    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: 'AIzaSyAqDbBJM-mDncVOiyRYwFHfcX-TZm37Wbw',
+      authDomain: 'barbearia-mf-d5fe5.firebaseapp.com',
+      projectId: 'barbearia-mf-d5fe5',
+      storageBucket: 'barbearia-mf-d5fe5.firebasestorage.app',
+      messagingSenderId: '307834413218',
+      appId: '1:307834413218:web:2db7f187d80ec543a337fb',
+      measurementId: 'G-QFLR8VQC8J'
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const DEFAULT_LOGO = './assets/logo-mf.png';
+    const DEFAULT_BARBERS = [
+      { nome: 'MF', especialidade: 'Corte social, degradê e acabamento', fotoUrl: './assets/barbeiros/barbeiro-1.jpg', horaInicio: '09:00', horaFim: '19:00', ativo: true },
+      { nome: 'Barbeiro 2', especialidade: 'Barba, acabamento e corte premium', fotoUrl: './assets/barbeiros/barbeiro-2.jpg', horaInicio: '09:00', horaFim: '19:00', ativo: true }
+    ];
+    const DEFAULT_SERVICES = [
+      { nome: 'Corte masculino', preco: 35, duracaoMinutos: 40, descricao: 'Corte alinhado com acabamento profissional.', ativo: true },
+      { nome: 'Barba', preco: 20, duracaoMinutos: 25, descricao: 'Barba na navalha com cuidado e precisão.', ativo: true },
+      { nome: 'Corte + Barba', preco: 50, duracaoMinutos: 60, descricao: 'Pacote completo para renovar o visual.', ativo: true }
+    ];
+    const DEFAULT_GALLERY = [
+      { title: 'Corte premium em destaque', image: './assets/galeria/galeria-01.jpg' },
+      { title: 'Barba e acabamento preciso', image: './assets/galeria/galeria-02.jpg' },
+      { title: 'Ambiente e experiência MF', image: './assets/galeria/galeria-03.jpg' }
+    ];
+
+    const now = new Date();
+    const todayISO = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+
+    const state = {
+      services: [],
+      barbers: [],
+      appointments: [],
+      finance: [],
+      settings: null,
+      activeSection: 'dashboardSection',
+      agendaDate: todayISO,
+      agendaBarber: '',
+      agendaStatus: '',
+      clientSearch: ''
+    };
+
+    const el = {
+      publicShell: document.getElementById('publicShell'),
+      adminShell: document.getElementById('adminShell'),
+      statusBanner: document.getElementById('statusBanner'),
+      statusText: document.getElementById('statusBannerText'),
+      toast: document.getElementById('toast'),
+      brandLogo: document.getElementById('brandLogo'),
+      heroLogo: document.getElementById('heroLogo'),
+      adminBrandLogo: document.getElementById('adminBrandLogo'),
+      publicWhatsapp: document.getElementById('publicWhatsapp'),
+      publicAddress: document.getElementById('publicAddress'),
+      publicInstagram: document.getElementById('publicInstagram'),
+      servicesGrid: document.getElementById('servicesGrid'),
+      barbersGrid: document.getElementById('barbersGrid'),
+      galleryGrid: document.getElementById('galleryGrid'),
+      bookingForm: document.getElementById('bookingForm'),
+      serviceSelect: document.getElementById('serviceSelect'),
+      barberSelect: document.getElementById('barberSelect'),
+      dateInput: document.getElementById('dateInput'),
+      timeSelect: document.getElementById('timeSelect'),
+      openLoginBtn: document.getElementById('openLoginBtn'),
+      loginModal: document.getElementById('loginModal'),
+      closeLoginBtn: document.getElementById('closeLoginBtn'),
+      loginForm: document.getElementById('loginForm'),
+      backSiteBtn: document.getElementById('backSiteBtn'),
+      logoutBtn: document.getElementById('logoutBtn'),
+      navButtons: [...document.querySelectorAll('.nav-btn')],
+      actionCards: [...document.querySelectorAll('.action-card')],
+      sections: [...document.querySelectorAll('.admin-section')],
+      todayFilterBtn: document.getElementById('todayFilterBtn'),
+      goAgendaBtn: document.getElementById('goAgendaBtn'),
+      todayAppointmentsCount: document.getElementById('todayAppointmentsCount'),
+      pendingCount: document.getElementById('pendingCount'),
+      todayRevenue: document.getElementById('todayRevenue'),
+      todayExpenses: document.getElementById('todayExpenses'),
+      todayAppointmentsTable: document.getElementById('todayAppointmentsTable'),
+      nextClientsBox: document.getElementById('nextClientsBox'),
+      bookingRulesBox: document.getElementById('bookingRulesBox'),
+      financeSummaryBox: document.getElementById('financeSummaryBox'),
+      agendaFilterDate: document.getElementById('agendaFilterDate'),
+      agendaFilterBarber: document.getElementById('agendaFilterBarber'),
+      agendaFilterStatus: document.getElementById('agendaFilterStatus'),
+      clearAgendaFiltersBtn: document.getElementById('clearAgendaFiltersBtn'),
+      allAppointmentsTable: document.getElementById('allAppointmentsTable'),
+      agendaDaySummary: document.getElementById('agendaDaySummary'),
+      agendaBarberSummary: document.getElementById('agendaBarberSummary'),
+      clientSearchInput: document.getElementById('clientSearchInput'),
+      clientsTable: document.getElementById('clientsTable'),
+      financeForm: document.getElementById('financeForm'),
+      financeSummaryDetailed: document.getElementById('financeSummaryDetailed'),
+      financeTable: document.getElementById('financeTable'),
+      barberForm: document.getElementById('barberForm'),
+      barbersTable: document.getElementById('barbersTable'),
+      serviceForm: document.getElementById('serviceForm'),
+      servicesTable: document.getElementById('servicesTable'),
+      settingsForm: document.getElementById('settingsForm'),
+      previewWhatsapp: document.getElementById('previewWhatsapp'),
+      previewInstagram: document.getElementById('previewInstagram'),
+      previewAddress: document.getElementById('previewAddress')
+    };
+
+    el.dateInput.min = todayISO;
+    el.dateInput.value = todayISO;
+    el.agendaFilterDate.value = todayISO;
+    document.getElementById('financeDate').value = todayISO;
+
+    function setStatus(message, type = 'online', temporary = false) {
+      el.statusText.textContent = message;
+      el.statusBanner.className = `status-banner show ${type}`;
+      if (temporary) setTimeout(() => el.statusBanner.classList.remove('show'), 2500);
+    }
+
+    function showToast(message, isError = false) {
+      el.toast.textContent = message;
+      el.toast.style.borderColor = isError ? 'rgba(223,91,91,.22)' : 'rgba(255,255,255,.12)';
+      el.toast.classList.add('show');
+      setTimeout(() => el.toast.classList.remove('show'), 3200);
+    }
+
+    function isOfflineError(err) {
+      return err?.code === 'unavailable' || err?.message?.toLowerCase().includes('offline');
+    }
+
+    function money(value = 0) {
+      return Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function sanitizePhone(phone = '') {
+      return phone.replace(/\D/g, '');
+    }
+
+    function initials(name = '') {
+      return name.split(' ').filter(Boolean).slice(0,2).map(v => v[0]?.toUpperCase()).join('') || 'MF';
+    }
+
+    function buildTimeSlots(start = '09:00', end = '19:00', interval = 30) {
+      const slots = [];
+      const [sh, sm] = start.split(':').map(Number);
+      const [eh, em] = end.split(':').map(Number);
+      const cur = new Date();
+      cur.setHours(sh, sm, 0, 0);
+      const finish = new Date();
+      finish.setHours(eh, em, 0, 0);
+      while (cur < finish) {
+        slots.push(`${String(cur.getHours()).padStart(2,'0')}:${String(cur.getMinutes()).padStart(2,'0')}`);
+        cur.setMinutes(cur.getMinutes() + interval);
+      }
+      return slots;
+    }
+
+    function slotKey(barbeiroId, data, hora) {
+      return `${barbeiroId}__${data}__${hora.replace(':','-')}`;
+    }
+
+    function slotDate(data, hora) {
+      return new Date(`${data}T${hora}:00`);
+    }
+
+    function canBookSlot(data, hora) {
+      return slotDate(data, hora).getTime() > Date.now() + 15 * 60 * 1000;
+    }
+
+    function revealItems() {
+      const items = document.querySelectorAll('.reveal');
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+      items.forEach(item => {
+        if (!item.classList.contains('in-view')) observer.observe(item);
+      });
+    }
+
+    function setActiveSection(id) {
+      state.activeSection = id;
+      el.sections.forEach(section => section.classList.toggle('active', section.id === id));
+      el.navButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.target === id));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderPublicServices() {
+      const active = state.services.filter(s => s.ativo);
+      el.servicesGrid.innerHTML = active.length ? active.map((service, i) => `
+        <div class="service-card reveal" style="transition-delay:${i * 70}ms">
+          <div class="section-tag" style="margin-bottom:14px;">Serviço ${String(i+1).padStart(2,'0')}</div>
+          <h3>${service.nome}</h3>
+          <p>${service.descricao || 'Serviço profissional realizado com atenção aos detalhes.'}</p>
+          <div class="price-pill">${money(service.preco)} • ${service.duracaoMinutos} min</div>
+        </div>
+      `).join('') : '<div class="empty-state">Nenhum serviço cadastrado ainda.</div>';
+      revealItems();
+    }
+
+    function renderPublicBarbers() {
+      const active = state.barbers.filter(b => b.ativo !== false);
+      el.barbersGrid.innerHTML = active.length ? active.map((barber, i) => `
+        <div class="barber-card reveal" style="transition-delay:${i * 90}ms">
+          <div class="avatar">${barber.fotoUrl ? `<img src="${barber.fotoUrl}" alt="${barber.nome}">` : initials(barber.nome)}</div>
+          <div>
+            <div class="mini-pill">Barbeiro ${i+1}</div>
+            <h3 style="margin-top:12px;">${barber.nome}</h3>
+            <p>${barber.especialidade || 'Especialista em corte, barba e acabamento profissional.'}</p>
+            <p style="margin-top:10px;"><strong>Expediente:</strong> ${barber.horaInicio || '09:00'} às ${barber.horaFim || '19:00'}</p>
+          </div>
+        </div>
+      `).join('') : '<div class="empty-state">Nenhum barbeiro cadastrado ainda.</div>';
+      revealItems();
+    }
+
+    function renderGallery() {
+      el.galleryGrid.innerHTML = DEFAULT_GALLERY.map((item, i) => `
+        <div class="gallery-card reveal" style="transition-delay:${i * 90}ms">
+          <div class="gallery-item" style="background-image:url('${item.image}')">
+            <span>${item.title}</span>
+          </div>
+        </div>
+      `).join('');
+      revealItems();
+    }
+
+    function populateBookingSelects() {
+      const services = state.services.filter(s => s.ativo);
+      const barbers = state.barbers.filter(b => b.ativo !== false);
+      el.serviceSelect.innerHTML = services.length
+        ? '<option value="">Selecione</option>' + services.map(s => `<option value="${s.id}">${s.nome} • ${money(s.preco)}</option>`).join('')
+        : '<option value="">Cadastre um serviço no painel</option>';
+
+      const barberOptions = barbers.length
+        ? '<option value="">Selecione</option>' + barbers.map(b => `<option value="${b.id}">${b.nome}</option>`).join('')
+        : '<option value="">Cadastre um barbeiro no painel</option>';
+
+      el.barberSelect.innerHTML = barberOptions;
+      el.agendaFilterBarber.innerHTML = '<option value="">Todos os barbeiros</option>' + barbers.map(b => `<option value="${b.id}">${b.nome}</option>`).join('');
+      el.agendaFilterBarber.value = state.agendaBarber;
+      updateAvailableTimes();
+    }
+
+    function updateAvailableTimes() {
+      const barberId = el.barberSelect.value;
+      const date = el.dateInput.value;
+      if (!barberId || !date) {
+        el.timeSelect.innerHTML = '<option value="">Escolha o barbeiro e a data</option>';
+        return;
+      }
+      const barber = state.barbers.find(b => b.id === barberId);
+      if (!barber) {
+        el.timeSelect.innerHTML = '<option value="">Barbeiro não encontrado</option>';
+        return;
+      }
+      const slots = buildTimeSlots(barber.horaInicio || '09:00', barber.horaFim || '19:00');
+      const reserved = state.appointments
+        .filter(a => a.barbeiroId === barberId && a.data === date && a.status !== 'cancelado')
+        .map(a => a.hora);
+      const available = slots.filter(slot => !reserved.includes(slot) && canBookSlot(date, slot));
+      el.timeSelect.innerHTML = available.length
+        ? '<option value="">Selecione</option>' + available.map(slot => `<option value="${slot}">${slot}</option>`).join('')
+        : '<option value="">Sem horários disponíveis</option>';
+    }
+
+    function filteredAppointments() {
+      return state.appointments.filter(item => {
+        const byDate = !state.agendaDate || item.data === state.agendaDate;
+        const byBarber = !state.agendaBarber || item.barbeiroId === state.agendaBarber;
+        const byStatus = !state.agendaStatus || item.status === state.agendaStatus;
+        return byDate && byBarber && byStatus;
+      }).sort((a, b) => `${a.data} ${a.hora}`.localeCompare(`${b.data} ${b.hora}`));
+    }
+
+    function clientsSummary() {
+      const map = new Map();
+      state.appointments.forEach(item => {
+        const key = `${item.clienteNome}|${item.clienteTelefone}`;
+        if (!map.has(key)) {
+          map.set(key, { nome: item.clienteNome, telefone: item.clienteTelefone, total: 0, ultimaData: item.data, ultimoServico: item.servicoNome });
+        }
+        const current = map.get(key);
+        current.total += 1;
+        if (item.data >= current.ultimaData) {
+          current.ultimaData = item.data;
+          current.ultimoServico = item.servicoNome;
+        }
+      });
+      return [...map.values()].sort((a, b) => b.total - a.total || b.ultimaData.localeCompare(a.ultimaData));
+    }
+
+    function appointmentsTable(rows) {
+      return `
+        <div class="table-wrap-scroll">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Horário</th>
+              <th>Cliente</th>
+              <th>Serviço</th>
+              <th>Barbeiro</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(item => `
+              <tr>
+                <td>${item.data === todayISO ? item.hora : `${item.data}<br><span style="color:var(--muted)">${item.hora}</span>`}</td>
+                <td><strong>${item.clienteNome}</strong><br><span style="color:var(--muted)">${item.clienteTelefone}</span></td>
+                <td>${item.servicoNome}</td>
+                <td>${item.barbeiroNome}</td>
+                <td><span class="status-pill status-${item.status}">${item.status}</span></td>
+                <td>
+                  <div class="row-actions">
+                    ${item.status === 'pendente' ? `<button data-action="complete" data-id="${item.id}">Concluir</button>` : ''}
+                    ${item.status !== 'cancelado' ? `<button data-action="cancel" data-id="${item.id}">Cancelar</button>` : ''}
+                    <button data-action="delete" data-id="${item.id}">Excluir</button>
+                  </div>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        </div>
+      `;
+    }
+
+    function renderDashboard() {
+      const todayRows = state.appointments.filter(a => a.data === todayISO).sort((a, b) => a.hora.localeCompare(b.hora));
+      const pending = state.appointments.filter(a => a.status === 'pendente').length;
+      const entries = state.finance.filter(f => f.tipo === 'entrada' && f.data === todayISO).reduce((s, v) => s + Number(v.valor || 0), 0);
+      const expenses = state.finance.filter(f => f.tipo === 'saida' && f.data === todayISO).reduce((s, v) => s + Number(v.valor || 0), 0);
+
+      el.todayAppointmentsCount.textContent = todayRows.length;
+      el.pendingCount.textContent = pending;
+      el.todayRevenue.textContent = money(entries);
+      el.todayExpenses.textContent = money(expenses);
+
+      el.todayAppointmentsTable.innerHTML = todayRows.length ? appointmentsTable(todayRows) : '<div class="empty-state">Nenhum agendamento para hoje.</div>';
+      el.nextClientsBox.innerHTML = todayRows.slice(0, 4).length
+        ? todayRows.slice(0, 4).map(item => `<div class="contact-item"><small>${item.hora} • ${item.barbeiroNome}</small><div><strong>${item.clienteNome}</strong><br>${item.servicoNome}</div></div>`).join('')
+        : '<div class="empty-state">Nenhum cliente previsto para hoje.</div>';
+      el.bookingRulesBox.innerHTML = `
+        <div class="contact-item"><small>Reserva duplicada</small><div>Bloqueada automaticamente quando o horário já está ocupado.</div></div>
+        <div class="contact-item"><small>Antecedência mínima</small><div>Agendamento permitido somente até 15 minutos antes.</div></div>
+        <div class="contact-item"><small>Horários exibidos</small><div>O cliente só vê horários realmente disponíveis.</div></div>
+      `;
+
+      const totalEntries = state.finance.filter(f => f.tipo === 'entrada').reduce((s, v) => s + Number(v.valor || 0), 0);
+      const totalExpenses = state.finance.filter(f => f.tipo === 'saida').reduce((s, v) => s + Number(v.valor || 0), 0);
+      const balance = totalEntries - totalExpenses;
+      const financeHtml = `
+        <div class="contact-item"><small>Total de entradas</small><div>${money(totalEntries)}</div></div>
+        <div class="contact-item"><small>Total de saídas</small><div>${money(totalExpenses)}</div></div>
+        <div class="contact-item"><small>Saldo</small><div>${money(balance)}</div></div>
+      `;
+      el.financeSummaryBox.innerHTML = financeHtml;
+      el.financeSummaryDetailed.innerHTML = financeHtml;
+    }
+
+    function renderAgenda() {
+      const rows = filteredAppointments();
+      el.allAppointmentsTable.innerHTML = rows.length ? appointmentsTable(rows) : '<div class="empty-state">Nenhum agendamento encontrado com esses filtros.</div>';
+      const selectedDate = state.agendaDate || todayISO;
+      const summaryRows = rows.filter(r => r.data === selectedDate);
+      const pending = summaryRows.filter(r => r.status === 'pendente').length;
+      const completed = summaryRows.filter(r => r.status === 'concluido').length;
+      const canceled = summaryRows.filter(r => r.status === 'cancelado').length;
+      el.agendaDaySummary.innerHTML = `
+        <div class="contact-item"><small>Pendentes</small><div>${pending}</div></div>
+        <div class="contact-item"><small>Concluídos</small><div>${completed}</div></div>
+        <div class="contact-item"><small>Cancelados</small><div>${canceled}</div></div>
+      `;
+      const grouped = new Map();
+      rows.forEach(item => grouped.set(item.barbeiroNome, (grouped.get(item.barbeiroNome) || 0) + 1));
+      const groups = [...grouped.entries()];
+      el.agendaBarberSummary.innerHTML = groups.length
+        ? groups.map(([name, total]) => `<div class="contact-item"><small>${name}</small><div>${total} cliente(s)</div></div>`).join('')
+        : '<div class="empty-state">Nenhum dado por barbeiro.</div>';
+    }
+
+    function renderClients() {
+      const search = state.clientSearch.trim().toLowerCase();
+      const rows = clientsSummary().filter(client => {
+        if (!search) return true;
+        return client.nome.toLowerCase().includes(search) || sanitizePhone(client.telefone).includes(sanitizePhone(search));
+      });
+      el.clientsTable.innerHTML = rows.length ? `
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Telefone</th>
+              <th>Total de visitas</th>
+              <th>Última data</th>
+              <th>Último serviço</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(item => `
+              <tr>
+                <td>${item.nome}</td>
+                <td>${item.telefone}</td>
+                <td>${item.total}</td>
+                <td>${item.ultimaData}</td>
+                <td>${item.ultimoServico || '-'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      ` : '<div class="empty-state">Nenhum cliente encontrado.</div>';
+    }
+
+    function renderFinance() {
+      const ordered = [...state.finance].sort((a, b) => b.data.localeCompare(a.data));
+      el.financeTable.innerHTML = ordered.length ? `
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Tipo</th>
+              <th>Categoria</th>
+              <th>Descrição</th>
+              <th>Valor</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${ordered.map(item => `
+              <tr>
+                <td>${item.data}</td>
+                <td>${item.tipo}</td>
+                <td>${item.categoria}</td>
+                <td>${item.descricao || '-'}</td>
+                <td>${money(item.valor)}</td>
+                <td><button class="btn btn-danger" style="padding:10px 12px;" data-delete-finance="${item.id}">Excluir</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      ` : '<div class="empty-state">Nenhum lançamento financeiro cadastrado.</div>';
+    }
+
+    function renderBarbersAdmin() {
+      el.barbersTable.innerHTML = state.barbers.length ? `
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Especialidade</th>
+              <th>Horário</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${state.barbers.map(barber => `
+              <tr>
+                <td>${barber.nome}</td>
+                <td>${barber.especialidade}</td>
+                <td>${barber.horaInicio} às ${barber.horaFim}</td>
+                <td><button class="btn btn-danger" style="padding:10px 12px;" data-delete-barber="${barber.id}">Excluir</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      ` : '<div class="empty-state">Nenhum barbeiro cadastrado.</div>';
+    }
+
+    function renderServicesAdmin() {
+      el.servicesTable.innerHTML = state.services.length ? `
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Serviço</th>
+              <th>Preço</th>
+              <th>Duração</th>
+              <th>Status</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${state.services.map(service => `
+              <tr>
+                <td>${service.nome}</td>
+                <td>${money(service.preco)}</td>
+                <td>${service.duracaoMinutos} min</td>
+                <td>${service.ativo ? 'Ativo' : 'Inativo'}</td>
+                <td><button class="btn btn-danger" style="padding:10px 12px;" data-delete-service="${service.id}">Excluir</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      ` : '<div class="empty-state">Nenhum serviço cadastrado.</div>';
+    }
+
+    function applySettings() {
+      const settings = state.settings || {};
+      const logo = settings.logoUrl || DEFAULT_LOGO;
+      el.brandLogo.src = logo;
+      el.heroLogo.src = logo;
+      el.adminBrandLogo.src = logo;
+      el.publicWhatsapp.textContent = settings.whatsapp || 'Preencha no painel administrativo.';
+      el.publicAddress.textContent = settings.endereco || 'Preencha no painel administrativo.';
+      el.publicInstagram.textContent = settings.instagram || 'Preencha no painel administrativo.';
+      el.previewWhatsapp.textContent = settings.whatsapp || '-';
+      el.previewInstagram.textContent = settings.instagram || '-';
+      el.previewAddress.textContent = settings.endereco || '-';
+      document.getElementById('settingsLogo').value = settings.logoUrl || '';
+      document.getElementById('settingsWhatsapp').value = settings.whatsapp || '';
+      document.getElementById('settingsInstagram').value = settings.instagram || '';
+      document.getElementById('settingsAddress').value = settings.endereco || '';
+    }
+
+    function renderAll() {
+      renderPublicServices();
+      renderPublicBarbers();
+      renderGallery();
+      populateBookingSelects();
+      applySettings();
+      renderDashboard();
+      renderAgenda();
+      renderClients();
+      renderFinance();
+      renderBarbersAdmin();
+      renderServicesAdmin();
+    }
+
+    async function enableOfflineSupport() {
+      try {
+        await enableIndexedDbPersistence(db);
+      } catch (error) {
+        if (error?.code !== 'failed-precondition' && error?.code !== 'unimplemented') {
+          console.warn('Persistência offline não ativada:', error);
+        }
+      }
+    }
+
+    async function ensureSettingsDoc() {
+      try {
+        const ref = doc(db, 'configuracoes', 'principal');
+        const snap = await getDoc(ref);
+        if (!snap.exists()) {
+          await setDoc(ref, { nomeBarbearia: 'Barbearia MF', logoUrl: '', whatsapp: '', instagram: '', endereco: '' });
+        }
+      } catch (error) {
+        if (!isOfflineError(error)) throw error;
+      }
+    }
+
+    async function seedInitialData() {
+      try {
+        const servicesSnap = await getDocs(collection(db, 'servicos'));
+        const barbersSnap = await getDocs(collection(db, 'barbeiros'));
+        if (servicesSnap.empty) {
+          for (const service of DEFAULT_SERVICES) {
+            await addDoc(collection(db, 'servicos'), { ...service, criadoEm: serverTimestamp() });
+          }
+        }
+        if (barbersSnap.empty) {
+          for (const barber of DEFAULT_BARBERS) {
+            await addDoc(collection(db, 'barbeiros'), { ...barber, criadoEm: serverTimestamp() });
+          }
+        }
+      } catch (error) {
+        if (!isOfflineError(error)) throw error;
+      }
+    }
+
+    function startListeners() {
+      onSnapshot(query(collection(db, 'servicos'), orderBy('nome')), snapshot => {
+        state.services = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderAll();
+        setStatus('Conectado ao Firebase. Dados em tempo real ativos.', 'online', true);
+      }, error => {
+        if (isOfflineError(error)) setStatus('Você está offline. Alguns dados podem estar desatualizados.', 'offline');
+      });
+
+      onSnapshot(query(collection(db, 'barbeiros'), orderBy('nome')), snapshot => {
+        state.barbers = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderAll();
+      }, error => {
+        if (isOfflineError(error)) setStatus('Sem internet. Exibindo barbeiros salvos localmente, se houver.', 'offline');
+      });
+
+      onSnapshot(query(collection(db, 'agendamentos'), orderBy('data'), orderBy('hora')), snapshot => {
+        state.appointments = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderAll();
+      }, error => {
+        if (isOfflineError(error)) setStatus('Os agendamentos não puderam ser atualizados agora porque o cliente está offline.', 'offline');
+      });
+
+      onSnapshot(query(collection(db, 'financeiro'), orderBy('data', 'desc')), snapshot => {
+        state.finance = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderAll();
+      }, error => {
+        if (isOfflineError(error)) setStatus('O financeiro está temporariamente offline.', 'offline');
+      });
+
+      onSnapshot(doc(db, 'configuracoes', 'principal'), snapshot => {
+        state.settings = snapshot.exists() ? snapshot.data() : null;
+        applySettings();
+      }, error => {
+        if (isOfflineError(error)) setStatus('As configurações não foram atualizadas por falta de conexão.', 'offline');
+      });
+    }
+
+    async function createAppointment(data) {
+      const ref = doc(db, 'agendamentos', slotKey(data.barbeiroId, data.data, data.hora));
+      await runTransaction(db, async transaction => {
+        const existing = await transaction.get(ref);
+        if (existing.exists() && existing.data()?.status !== 'cancelado') throw new Error('slot-already-booked');
+        if (!canBookSlot(data.data, data.hora)) throw new Error('slot-too-late');
+        transaction.set(ref, { ...data, status: 'pendente', criadoEm: serverTimestamp() });
+      });
+    }
+
+    el.openLoginBtn.addEventListener('click', () => el.loginModal.classList.add('open'));
+    el.closeLoginBtn.addEventListener('click', () => el.loginModal.classList.remove('open'));
+    el.backSiteBtn.addEventListener('click', () => {
+      el.publicShell.classList.remove('hidden');
+      el.adminShell.classList.remove('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    el.dateInput.addEventListener('change', updateAvailableTimes);
+    el.barberSelect.addEventListener('change', updateAvailableTimes);
+
+    el.navButtons.forEach(btn => btn.addEventListener('click', () => setActiveSection(btn.dataset.target)));
+    el.actionCards.forEach(btn => btn.addEventListener('click', () => setActiveSection(btn.dataset.target)));
+    el.goAgendaBtn.addEventListener('click', () => setActiveSection('agendaSection'));
+    el.todayFilterBtn.addEventListener('click', () => {
+      state.agendaDate = todayISO;
+      el.agendaFilterDate.value = todayISO;
+      setActiveSection('agendaSection');
+      renderAgenda();
+    });
+
+    el.agendaFilterDate.addEventListener('change', e => { state.agendaDate = e.target.value; renderAgenda(); });
+    el.agendaFilterBarber.addEventListener('change', e => { state.agendaBarber = e.target.value; renderAgenda(); });
+    el.agendaFilterStatus.addEventListener('change', e => { state.agendaStatus = e.target.value; renderAgenda(); });
+    el.clearAgendaFiltersBtn.addEventListener('click', () => {
+      state.agendaDate = todayISO;
+      state.agendaBarber = '';
+      state.agendaStatus = '';
+      el.agendaFilterDate.value = todayISO;
+      el.agendaFilterBarber.value = '';
+      el.agendaFilterStatus.value = '';
+      renderAgenda();
+    });
+    el.clientSearchInput.addEventListener('input', e => { state.clientSearch = e.target.value; renderClients(); });
+
+    el.loginForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      try {
+        await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value.trim(), document.getElementById('loginPassword').value.trim());
+        el.loginModal.classList.remove('open');
+        showToast('Login realizado com sucesso.');
+      } catch (error) {
+        showToast(isOfflineError(error) ? 'Não foi possível fazer login porque o cliente está offline.' : 'Não foi possível fazer login. Confira e-mail e senha.', true);
+      }
+    });
+
+    el.logoutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+      showToast('Você saiu do painel.');
+    });
+
+    el.bookingForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      const clienteNome = document.getElementById('clientName').value.trim();
+      const clienteTelefone = document.getElementById('clientPhone').value.trim();
+      const servicoId = el.serviceSelect.value;
+      const barbeiroId = el.barberSelect.value;
+      const data = el.dateInput.value;
+      const hora = el.timeSelect.value;
+      const observacao = document.getElementById('clientNotes').value.trim();
+
+      if (!clienteNome || !clienteTelefone || !servicoId || !barbeiroId || !data || !hora) {
+        showToast('Preencha todos os campos obrigatórios.', true);
+        return;
+      }
+      if (!canBookSlot(data, hora)) {
+        showToast('Esse horário já está muito próximo. O agendamento só é permitido até 15 minutos antes.', true);
+        updateAvailableTimes();
+        return;
+      }
+      const duplicate = state.appointments.some(a => a.barbeiroId === barbeiroId && a.data === data && a.hora === hora && a.status !== 'cancelado');
+      if (duplicate) {
+        showToast('Esse horário já foi reservado. Escolha outro.', true);
+        updateAvailableTimes();
+        return;
+      }
+
+      const service = state.services.find(s => s.id === servicoId);
+      const barber = state.barbers.find(b => b.id === barbeiroId);
+
+      try {
+        await createAppointment({
+          clienteNome,
+          clienteTelefone,
+          clienteTelefoneNumeros: sanitizePhone(clienteTelefone),
+          servicoId,
+          servicoNome: service?.nome || '',
+          preco: Number(service?.preco || 0),
+          barbeiroId,
+          barbeiroNome: barber?.nome || '',
+          data,
+          hora,
+          observacao
+        });
+        el.bookingForm.reset();
+        el.dateInput.value = todayISO;
+        populateBookingSelects();
+        showToast('Agendamento confirmado com sucesso.');
+      } catch (error) {
+        if (error?.message === 'slot-already-booked') {
+          showToast('Esse horário acabou de ser reservado por outro cliente. Escolha outro.', true);
+        } else if (error?.message === 'slot-too-late') {
+          showToast('Esse horário já está muito próximo. O agendamento só é permitido até 15 minutos antes.', true);
+        } else if (isOfflineError(error)) {
+          showToast('Sem conexão no momento. Tente novamente quando a internet voltar.', true);
+        } else {
+          showToast('Não foi possível salvar o agendamento.', true);
+        }
+        updateAvailableTimes();
+      }
+    });
+
+    el.financeForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      try {
+        await addDoc(collection(db, 'financeiro'), {
+          tipo: document.getElementById('financeType').value,
+          valor: Number(document.getElementById('financeValue').value),
+          categoria: document.getElementById('financeCategory').value.trim(),
+          data: document.getElementById('financeDate').value,
+          descricao: document.getElementById('financeDescription').value.trim(),
+          origem: 'manual',
+          criadoEm: serverTimestamp()
+        });
+        e.target.reset();
+        document.getElementById('financeDate').value = todayISO;
+        showToast('Lançamento financeiro salvo.');
+      } catch (error) {
+        showToast(isOfflineError(error) ? 'Sem conexão para salvar o lançamento.' : 'Erro ao salvar lançamento.', true);
+      }
+    });
+
+    el.barberForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      try {
+        await addDoc(collection(db, 'barbeiros'), {
+          nome: document.getElementById('barberName').value.trim(),
+          especialidade: document.getElementById('barberSpecialty').value.trim(),
+          fotoUrl: document.getElementById('barberPhotoUrl').value.trim(),
+          horaInicio: document.getElementById('barberStart').value,
+          horaFim: document.getElementById('barberEnd').value,
+          ativo: true,
+          criadoEm: serverTimestamp()
+        });
+        e.target.reset();
+        document.getElementById('barberStart').value = '09:00';
+        document.getElementById('barberEnd').value = '19:00';
+        showToast('Barbeiro salvo com sucesso.');
+      } catch (error) {
+        showToast(isOfflineError(error) ? 'Sem conexão para salvar barbeiro.' : 'Erro ao salvar barbeiro.', true);
+      }
+    });
+
+    el.serviceForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      try {
+        await addDoc(collection(db, 'servicos'), {
+          nome: document.getElementById('serviceName').value.trim(),
+          preco: Number(document.getElementById('servicePrice').value),
+          duracaoMinutos: Number(document.getElementById('serviceDuration').value),
+          descricao: document.getElementById('serviceDescription').value.trim(),
+          ativo: document.getElementById('serviceActive').value === 'true',
+          criadoEm: serverTimestamp()
+        });
+        e.target.reset();
+        showToast('Serviço salvo com sucesso.');
+      } catch (error) {
+        showToast(isOfflineError(error) ? 'Sem conexão para salvar serviço.' : 'Erro ao salvar serviço.', true);
+      }
+    });
+
+    el.settingsForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      try {
+        await setDoc(doc(db, 'configuracoes', 'principal'), {
+          nomeBarbearia: 'Barbearia MF',
+          logoUrl: document.getElementById('settingsLogo').value.trim(),
+          whatsapp: document.getElementById('settingsWhatsapp').value.trim(),
+          instagram: document.getElementById('settingsInstagram').value.trim(),
+          endereco: document.getElementById('settingsAddress').value.trim()
+        }, { merge: true });
+        showToast('Configurações salvas com sucesso.');
+      } catch (error) {
+        showToast(isOfflineError(error) ? 'Sem conexão para salvar as configurações.' : 'Erro ao salvar configurações.', true);
+      }
+    });
+
+    document.addEventListener('click', async e => {
+      const action = e.target.getAttribute('data-action');
+      const id = e.target.getAttribute('data-id');
+      const delFinance = e.target.getAttribute('data-delete-finance');
+      const delBarber = e.target.getAttribute('data-delete-barber');
+      const delService = e.target.getAttribute('data-delete-service');
+
+      try {
+        if (action && id) {
+          const appointment = state.appointments.find(a => a.id === id);
+          if (!appointment) return;
+          if (action === 'complete') {
+            await updateDoc(doc(db, 'agendamentos', id), { status: 'concluido' });
+            const alreadyCreated = state.finance.some(f => f.agendamentoId === id && f.origem === 'agendamento');
+            if (!alreadyCreated) {
+              await addDoc(collection(db, 'financeiro'), {
+                tipo: 'entrada',
+                valor: Number(appointment.preco || 0),
+                categoria: 'Atendimento',
+                data: appointment.data,
+                descricao: `${appointment.servicoNome} • ${appointment.clienteNome}`,
+                origem: 'agendamento',
+                agendamentoId: id,
+                criadoEm: serverTimestamp()
+              });
+            }
+            showToast('Atendimento concluído e entrada registrada.');
+          }
+          if (action === 'cancel') {
+            await updateDoc(doc(db, 'agendamentos', id), { status: 'cancelado' });
+            showToast('Agendamento cancelado.');
+          }
+          if (action === 'delete') {
+            await deleteDoc(doc(db, 'agendamentos', id));
+            showToast('Agendamento excluído.');
+          }
+        }
+
+        if (delFinance) {
+          await deleteDoc(doc(db, 'financeiro', delFinance));
+          showToast('Lançamento excluído.');
+        }
+        if (delBarber) {
+          await deleteDoc(doc(db, 'barbeiros', delBarber));
+          showToast('Barbeiro excluído.');
+        }
+        if (delService) {
+          await deleteDoc(doc(db, 'servicos', delService));
+          showToast('Serviço excluído.');
+        }
+      } catch (error) {
+        showToast(isOfflineError(error) ? 'Sem conexão para executar essa ação.' : 'Ocorreu um erro ao executar a ação.', true);
+      }
+    });
+
+    onAuthStateChanged(auth, user => {
+      el.publicShell.classList.toggle('hidden', !!user);
+      el.adminShell.classList.toggle('active', !!user);
+      if (user) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+
+    window.addEventListener('online', () => setStatus('Internet restaurada. Tentando sincronizar com o Firebase...', 'online', true));
+    window.addEventListener('offline', () => setStatus('Você está sem internet. O app continua aberto com os dados disponíveis localmente.', 'offline'));
+
+    function runSelfChecks() {
+      console.assert(buildTimeSlots('09:00', '10:00', 30).length === 2, 'Teste: slots entre 09:00 e 10:00 devem gerar 2 horários.');
+      console.assert(sanitizePhone('(81) 99999-1234') === '81999991234', 'Teste: telefone deve conter apenas números.');
+      console.assert(typeof slotKey('b1', '2099-01-01', '10:00') === 'string', 'Teste: chave do horário deve ser string.');
+      console.assert(canBookSlot('2099-01-01', '10:00') === true, 'Teste: horário futuro deve ser agendável.');
+    }
+
+    async function init() {
+      renderGallery();
+      revealItems();
+      runSelfChecks();
+      setStatus(navigator.onLine ? 'Conectando ao Firebase...' : 'Você está offline. O site será carregado com os dados disponíveis localmente.', navigator.onLine ? 'online' : 'offline');
+      await enableOfflineSupport();
+      await ensureSettingsDoc();
+      await seedInitialData();
+
+      state.services = DEFAULT_SERVICES.map((item, i) => ({ id: `local-service-${i+1}`, ...item }));
+      state.barbers = DEFAULT_BARBERS.map((item, i) => ({ id: `local-barber-${i+1}`, ...item }));
+      renderAll();
+      startListeners();
+    }
+
+    init().catch(error => {
+      console.error(error);
+      state.services = DEFAULT_SERVICES.map((item, i) => ({ id: `local-service-${i+1}`, ...item }));
+      state.barbers = DEFAULT_BARBERS.map((item, i) => ({ id: `local-barber-${i+1}`, ...item }));
+      renderAll();
+      setStatus(isOfflineError(error) ? 'Firebase indisponível no momento. O app abriu em modo local.' : 'Erro ao iniciar o sistema. Verifique a configuração do Firebase e as regras do projeto.', isOfflineError(error) ? 'offline' : 'error');
+    });
+  </script>
+</body>
+</html>
